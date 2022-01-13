@@ -1,0 +1,114 @@
+{{template "header" . }}
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">Converter</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" 
+        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" 
+        aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+            
+    </div>
+</nav>
+
+ <section>
+    <h2 class="display-4 text-center mt-5 mb-3"></h2>
+    
+    <div class="container">
+        <div class="alert" id="error-div" style="display: none;" role="alert">
+            
+        </div>
+        <div style="
+        background: white;
+        padding: 100px 100px;
+        border: 10px solid white;
+        border-radius: 10px;
+        box-shadow: rgb(35 55 80 / 30%) 0px 6px 12px">
+            <div class="col-xs-4">
+                <label for="number" class="form-label">Amount</label>
+                <input type="number" class="form-control common-height" id="number" placeholder="104.00">
+            </div>
+            <br>
+            <div class="col-xs-4">
+                <label for="currency" class="form-label">From</label>
+                <select name="currency" id="currency" class="form-select to_country form-select-lg mb-3" aria-label=".form-select-lg example">
+                    <option value="" selected>Select Option</option>
+                    <option value="KES">🇰🇪 KSH - Kenyan Shillings</option>
+                    <option value="GHS">🇬🇭 GHS - Ghana Cedis</option>
+                    <option value="NGN">🇳🇬 NGN - Nigerian Naira</option>
+                </select>
+            </div>
+            <br>
+            <div class="col-xs-4">
+                <label for="currency2" class="form-label">To</label>
+                <select name="currency" id="currency2" class="form-select to_country form-select-lg mb-3" aria-label=".form-select-lg example" onchange="convert_amount()">
+                    <option value="" selected>Select Option</option>
+                    <option value="KES">🇰🇪 KSH - Kenyan Shillings</option>
+                    <option value="GHS">🇬🇭 GHS - Ghana Cedis</option>
+                    <option value="NGN">🇳🇬 NGN - Nigerian Naira</option>
+                </select>
+            </div>
+            <div id="converted-result" style="margin-top: 24px; opacity: 1; display: none;">
+                <div style="height: auto; overflow: visible; visibility: visible;border: 5px dotted;padding: 20px;border-radius: 5px;color: #0f3d64;width: fit-content;">
+                    <p style="font-weight: bolder;color: #0f3d64;" id="source_amount"></p>
+                    <p style="font-weight: bolder;font-size: 25px;color: #0f3d64;" id="converted_amount"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+ </section>
+ <script>
+     $(".to_country").select2();
+
+    function convert_amount(){
+        const number = document.getElementById("number").value;
+        let source = document.getElementById("currency").value;
+        let dest = document.getElementById("currency2").value;
+
+        var obj = { value: number, source: source, dest: dest};
+        var data = JSON.stringify(obj);
+
+        if (number == "" || source == ""){
+            document.getElementById("error-div").style.display = 'block';
+            document.getElementById("error-div").innerHTML = "Please provide amount/currency"
+        }else{
+            if (source == dest){
+                document.getElementById("error-div").style.display = 'block';
+                document.getElementById("error-div").innerHTML = "Please make sure you select different currency"
+            }else{
+                $.ajax({
+                    method: "POST",
+                    headers: {
+                        'Content-Type':'application/json'
+                    },
+                    url: '/convert',
+                    data: data,
+                    cache: false,
+                    dataType: "json",
+                    success: function(response)
+                    {
+                        if (response.isSuccess === "false") {
+                            console.log(response)
+                            console.log("ERROR")
+                            document.getElementById("error-div").innerHTML = response.AlertMsg
+                            document.getElementById("error-div").style.display = 'block';
+
+                        }else{
+                            document.getElementById("converted-result").style.display = 'block';
+                            document.getElementById("error-div").style.display = 'none';
+
+                            let source_amount = response.value + " " + response.sourceDescription +" = "
+                            let converted_amount = response.converted_amount + " " + response.destDescription
+
+                            document.getElementById("source_amount").innerHTML = source_amount
+                            document.getElementById("converted_amount").innerHTML = converted_amount
+                        }
+                    }
+                });
+            }
+            
+        }
+    }
+ </script>
+
+{{template "footer" . }}
