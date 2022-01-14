@@ -52,7 +52,7 @@ func Convert(w http.ResponseWriter, r *http.Request) {
 	}
 
 	i, _ := strconv.ParseFloat(amount, 64)
-	if i == 0 {
+	if i == 0 || i < 0 {
 		w.Write([]byte(`{ "isSuccess": "false", "AlertTitle": "Amount is Required", "AlertMsg": "Please enter amount greater than zero.", "AlertType": "error" }`))
 		return
 	}
