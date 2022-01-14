@@ -102,27 +102,6 @@ func Convert(w http.ResponseWriter, r *http.Request) {
 		dest_description = "Unknown"
 	}
 
-	// url := "https://free-currency-converter.herokuapp.com/list/convert?source=" + source + "&destination=" + dest + "&price=" + amount
-	// resp, err := http.Get(url)
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
-
-	// defer resp.Body.Close()
-	// bodyBytes, _ := ioutil.ReadAll(resp.Body)
-
-	// type Response struct {
-	// 	Success         bool
-	// 	Message         string
-	// 	Source          string
-	// 	Destination     string
-	// 	Price           string
-	// 	Converted_value float64
-	// }
-
-	// var responseObject Response
-	// json.Unmarshal(bodyBytes, &responseObject)
-
 	amount_to_convert, err := strconv.ParseFloat(amount, 64)
 	if err != nil {
 		log.Fatalln(err)
