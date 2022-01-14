@@ -20,7 +20,6 @@ func MainRouters(r *mux.Router) {
 	r.HandleFunc("/convert", Convert).Methods("POST")
 }
 
-// contextData are the most widely use common variables for each pages to load.
 type contextData map[string]interface{}
 
 func Convert(w http.ResponseWriter, r *http.Request) {
@@ -40,24 +39,12 @@ func Convert(w http.ResponseWriter, r *http.Request) {
 	source := keyVal["source"]
 	dest := keyVal["dest"]
 
-	// type ErrorResponse struct {
-	// 	Success         bool
-	// 	Message         string
-	// 	Source          string
-	// 	Destination     string
-	// 	Price           string
-	// 	Converted_value float64
-	// }
-
-	// var responseObject Response
-	// json.Unmarshal(bodyBytes, &responseObject)
-
 	if len(amount) == 0 {
 		w.Write([]byte(`{ "isSuccess": "false", "AlertTitle": "Amount is Required", "AlertMsg": "Please enter amount.", "AlertType": "error" }`))
 		return
 	}
 
-	i, _ := strconv.Atoi(amount)
+	i, _ := strconv.ParseFloat(amount, 64)
 	if i == 0 {
 		w.Write([]byte(`{ "isSuccess": "false", "AlertTitle": "Amount is Required", "AlertMsg": "Please enter amount greater than zero.", "AlertType": "error" }`))
 		return
@@ -135,7 +122,6 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		"PageMetaDesc": config.SiteSlogan,
 		"CanonicalURL": r.RequestURI,
 		"CsrfToken":    csrf.Token(r),
-		"Settings":     config.SiteSettings,
 	}
 	tmpl.Execute(w, data)
 }

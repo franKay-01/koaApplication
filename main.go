@@ -16,7 +16,7 @@ import (
 	"github.com/itrepablik/sakto"
 )
 
-var CurrentLocalTime = sakto.GetCurDT(time.Now(), "Africa/Accra")
+var CurrentLocalTime = sakto.GetCurDT(time.Now(), config.SiteTimeZone)
 
 func main() {
 	os.Setenv("TZ", config.SiteTimeZone)
