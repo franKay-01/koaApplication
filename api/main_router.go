@@ -39,6 +39,13 @@ func Convert(w http.ResponseWriter, r *http.Request) {
 	source := keyVal["source"]
 	dest := keyVal["dest"]
 
+	const kenyanShellingRate = 113.39
+	const ghanaCedisRate = 6.2
+	const nigerianNiaraRate = 414.10
+
+	var sourceRate = 0.0
+	var destRate = 0.0
+
 	if len(amount) == 0 {
 		w.Write([]byte(`{ "isSuccess": "false", "AlertTitle": "Amount is Required", "AlertMsg": "Please enter amount.", "AlertType": "error" }`))
 		return
@@ -69,10 +76,14 @@ func Convert(w http.ResponseWriter, r *http.Request) {
 	switch source {
 	case "NGN":
 		source_description = "Nigerian Niara (NGN)"
+		sourceRate = nigerianNiaraRate
+
 	case "GHS":
 		source_description = "Ghana Cedis (GHS)"
+		sourceRate = ghanaCedisRate
 	case "KES":
 		source_description = "Kenyan Shellings (KSH)"
+		sourceRate = kenyanShellingRate
 	default:
 		source_description = "Unknown"
 	}
@@ -80,36 +91,45 @@ func Convert(w http.ResponseWriter, r *http.Request) {
 	switch dest {
 	case "NGN":
 		dest_description = "Nigerian Niara (NGN)"
+		destRate = nigerianNiaraRate
 	case "GHS":
 		dest_description = "Ghana Cedis (GHS)"
+		destRate = ghanaCedisRate
 	case "KES":
 		dest_description = "Kenyan Shellings (KSH)"
+		destRate = kenyanShellingRate
 	default:
 		dest_description = "Unknown"
 	}
 
-	url := "https://free-currency-converter.herokuapp.com/list/convert?source=" + source + "&destination=" + dest + "&price=" + amount
-	resp, err := http.Get(url)
+	// url := "https://free-currency-converter.herokuapp.com/list/convert?source=" + source + "&destination=" + dest + "&price=" + amount
+	// resp, err := http.Get(url)
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
+
+	// defer resp.Body.Close()
+	// bodyBytes, _ := ioutil.ReadAll(resp.Body)
+
+	// type Response struct {
+	// 	Success         bool
+	// 	Message         string
+	// 	Source          string
+	// 	Destination     string
+	// 	Price           string
+	// 	Converted_value float64
+	// }
+
+	// var responseObject Response
+	// json.Unmarshal(bodyBytes, &responseObject)
+
+	amount_to_convert, err := strconv.ParseFloat(amount, 64)
 	if err != nil {
 		log.Fatalln(err)
 	}
+	calculated_amount := (destRate / sourceRate) * amount_to_convert
 
-	defer resp.Body.Close()
-	bodyBytes, _ := ioutil.ReadAll(resp.Body)
-
-	type Response struct {
-		Success         bool
-		Message         string
-		Source          string
-		Destination     string
-		Price           string
-		Converted_value float64
-	}
-
-	var responseObject Response
-	json.Unmarshal(bodyBytes, &responseObject)
-
-	w.Write([]byte(`{ "isSuccess": "true","converted_amount":"` + strconv.FormatFloat(responseObject.Converted_value, 'f', 6, 64) + `","value": "` + amount + `","sourceDescription": "` + source_description + `","destDescription": "` + dest_description + `", "alertMsg": "Amount converted successfully",
+	w.Write([]byte(`{ "isSuccess": "true","converted_amount":"` + strconv.FormatFloat(calculated_amount, 'f', 6, 64) + `","value": "` + amount + `","sourceDescription": "` + source_description + `","destDescription": "` + dest_description + `", "alertMsg": "Amount converted successfully",
 		"alertType": "success"}`))
 }
 
